@@ -7,7 +7,7 @@ For using tokenizer or and model install requirements from `requirements_myt5.tx
 
 ### Tokenizer
 
-Custo implementation of MYTE tokenizer is in `src/myt5/myt5_tokenizer.py`. 
+Custom implementation of MYTE tokenizer is in `src/myt5/myt5_tokenizer.py`.
 
 ```python
 from src.myt5.myt5_tokenizer import MyT5Tokenizer
@@ -17,7 +17,7 @@ tokenized = tokenizer.tokenize("roughly at 12.")
 # expected output: ['52', '82', 'a3', '93', '6c', '79', '20', '61', '74', '20', '31', '32', '2e']
 ```
 
-You may also use custom byte maps for byte decomposition and merging (e.g. of morphemes) 
+You may also use custom byte maps for byte decomposition and merging (e.g. of morphemes)
 by providing custom merge and decompose maps.
 
 ```python
@@ -26,7 +26,7 @@ tokenizer = MyT5Tokenizer(decompose_map="byte_maps/decompose_map.json", merge_ma
 ```
 
 ### Model
-Instruction for basic generation with myte model (MyT5).
+Instruction for basic generation with MYTE model (MyT5).
 
 ```python
 from transformers import T5ForConditionalGeneration
@@ -52,7 +52,7 @@ probs = torch.nn.functional.softmax(outputs.logits, dim=-1)
 
 ```
 
-Note that the only difference betwean usage in MyT5 and ByT5 models is the tokenizer.
+Note that the only difference between usage in MyT5 and ByT5 models is the tokenizer.
 More documentation for ByT5 models on the HuggingFace model [page](https://huggingface.co/google/byt5-base).
 
 ## Citation
@@ -61,7 +61,7 @@ The code is associated with the [paper](https://arxiv.org/pdf/2403.10691.pdf):
 
 ```bibtex
 @misc{limisiewicz2024myte,
-      title={MYTE: Morphology-Driven Byte Encoding for Better and Fairer Multilingual Language Modeling}, 
+      title={MYTE: Morphology-Driven Byte Encoding for Better and Fairer Multilingual Language Modeling},
       author={Tomasz Limisiewicz and Terra Blevins and Hila Gonen and Orevaoghene Ahia and Luke Zettlemoyer},
       year={2024},
       eprint={2403.10691},

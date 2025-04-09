@@ -16,7 +16,7 @@ import csv
 from itertools import islice, cycle
 from collections import defaultdict
 
-N_EVAL_BATCHES = 50
+N_EVAL_BATCHES = 64
 
 TRANSLATION_LANGUAGES = ['ta', 'te', 'el', 'hy', 'ru', 'kk', 'am', 'vi', 'ja', 'fr', 'sm', 'st', 'ko', 'de', 'mt', 'pl', 'sn', 'en']
 
@@ -90,7 +90,7 @@ def get_dataset(tokenizer, task, directory, shrads=10):
 	return train_loaders, eval_loader, test_loader
 
 
-def train_evaluate(model, train_loaders, eval_loader, lr=1e-4, n_epochs=30, orig_patience=2):
+def train_evaluate(model, train_loaders, eval_loader, lr=1e-3, n_epochs=30, orig_patience=2):
 	patience=orig_patience
 	accelerator = Accelerator(gradient_accumulation_steps=16, mixed_precision="bf16")
 	device = accelerator.device
