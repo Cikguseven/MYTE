@@ -16,7 +16,7 @@
 
 
 import warnings
-from typing import List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 from transformers.tokenization_utils import AddedToken, PreTrainedTokenizer
 from transformers.utils import logging
@@ -32,7 +32,7 @@ class ByteRewriter:
 
     LEAF ='[LEAF]'
 
-    def __init__(self, rewriting_rules: Union[str, dict[str, str]]):
+    def __init__(self, rewriting_rules: Union[str, Dict[str, str]]):
 
         if type(rewriting_rules) == str:
             with open(rewriting_rules, "r") as f:
