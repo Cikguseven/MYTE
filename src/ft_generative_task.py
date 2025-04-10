@@ -18,7 +18,24 @@ from collections import defaultdict
 
 N_EVAL_BATCHES = 64
 
-TRANSLATION_LANGUAGES = ['ta', 'te', 'el', 'hy', 'ru', 'kk', 'am', 'vi', 'ja', 'fr', 'sm', 'st', 'ko', 'de', 'mt', 'pl', 'sn', 'en']
+TRANSLATION_LANGUAGES = [
+    'am',
+    'de',
+    'el',
+    'en',
+    'fr',
+    'hy',
+    'ja',
+    'kk',
+    'ko',
+    'mt',
+    'pl',
+    'ru',
+    'sn',
+    'ta',
+    'te',
+    'vi'
+    ]
 
 
 def preprocess_function(examples, tokenizer):
@@ -39,7 +56,6 @@ def preprocess_function(examples, tokenizer):
 
 
 def reconstruct(inp, tokenizer, model):
-
 	device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 	result = []
 	tokenized = tokenizer(inp, padding=True, return_tensors="pt").to(device)
@@ -168,7 +184,7 @@ def infer(model, tokenizer, evaluation_loader, model_type, model_size, directory
 
 if __name__ == "__main__":
 	argparser = argparse.ArgumentParser()
-	argparser.add_argument("--checkpoint_dir", required=False, default="../../hf_checkpoints", type=str)
+	argparser.add_argument("--checkpoint_dir", required=True, type=str)
 
 	argparser.add_argument("--task", required=True, type=str)
 	argparser.add_argument("--directory", required=True, type=str)

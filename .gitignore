@@ -1,4 +1,5 @@
 .vscode/
 /flores200_dataset
 /muse
-/myt5-large
+/models
+/src/__pycache__/
