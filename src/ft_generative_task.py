@@ -192,7 +192,7 @@ if __name__ == "__main__":
 	argparser.add_argument("--model_size", required=True, type=str)
 
 	argparser.add_argument("--patience", default=2, type=int)
-	argparser.add_argument("--lr", default=1e-4, type=float)
+	argparser.add_argument("--lr", default=1e-3, type=float)
 	argparser.add_argument("--experiment_name", default=None, type=str)
 	argparser.add_argument("--model_steps", required=False, type=int, default=250000)
 
@@ -226,7 +226,7 @@ if __name__ == "__main__":
 		if args.experiment_name is None:
 			model.save_pretrained(f"{args.checkpoint_dir}/{args.model_type}_{args.model_size}_{args.model_steps}_{args.task}", use_safetensors=True)
 
-	infer(model, tokenizer, eval_loader, args.model_type, args.model_size, args.directory,
-	      split='dev', experiment_name=args.experiment_name)
-	# infer(model, tokenizer, test_loader, args.model_type, args.model_size, args.directory,
-	#       split='submission' if args.task == "spelling_correction" else 'devtest', experiment_name=args.experiment_name)
+	# infer(model, tokenizer, eval_loader, args.model_type, args.model_size, args.directory,
+	#       split='dev', experiment_name=args.experiment_name)
+	infer(model, tokenizer, test_loader, args.model_type, args.model_size, args.directory,
+	      split='submission' if args.task == "spelling_correction" else 'devtest', experiment_name=args.experiment_name)

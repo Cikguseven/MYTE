@@ -85,7 +85,6 @@ def stats_for_task(model, tokenizer, lang, task, dataset_directory, batch_size, 
 		labels = torch.stack(batch['labels'], axis=1).to(device)
 		batch_compressions = batch['compressions']
 
-
 		if device.type == "cuda":
 			torch.cuda.synchronize()
 		start = time.time()
@@ -114,8 +113,8 @@ def stats_for_task(model, tokenizer, lang, task, dataset_directory, batch_size, 
 
 if __name__ == "__main__":
 	argparser = argparse.ArgumentParser()
-	argparser.add_argument("--checkpoint_dir", required=False, default="../hf_checkpoints", type=str)
-	argparser.add_argument("--dataset_directory", required=False, default="../xtreme_up_v1.1_lower", type=str)
+	argparser.add_argument("--checkpoint_dir", required=True, type=str)
+	argparser.add_argument("--dataset_directory", required=False, default="../xtreme_up_v1.1", type=str)
 	argparser.add_argument("--results_dir", required=False, default="../xtreme_up_results", type=str)
 
 	argparser.add_argument("--task", required=True, type=str)
@@ -125,7 +124,7 @@ if __name__ == "__main__":
 
 	args = argparser.parse_args()
 
-	device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+	device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
 
 	model, tokenizer = get_model_tokenizer(args.model_type, args.model_size, args.model_steps, args.checkpoint_dir, device=device)
 
