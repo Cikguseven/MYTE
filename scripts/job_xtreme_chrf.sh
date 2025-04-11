@@ -2,7 +2,7 @@
 
 MODEL_DIR="../models"
 MODEL_TYPE="myt5"
-MODEL_SIZE="large-mt-v1"
+MODEL_SIZE="large-mt-v2"
 
 CUDA_VISIBLE_DEVICES=0,1,2,3 \
 
