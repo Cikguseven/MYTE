@@ -56,7 +56,7 @@ def preprocess_function(examples, tokenizer):
 
 
 def reconstruct(inp, tokenizer, model):
-	device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+	device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
 	result = []
 	tokenized = tokenizer(inp, padding=True, return_tensors="pt").to(device)
 	out = model.generate(**tokenized, max_length=300)
@@ -69,7 +69,6 @@ def reconstruct(inp, tokenizer, model):
 
 
 def get_dataset(tokenizer, task, directory, shrads=10):
-
 	if task == "spelling_correction":
 		train_eval_dataset = load_dataset("csv", data_files=f"{directory}/train.csv")["train"]
 		test_dataset = load_dataset("csv", data_files=f"{directory}/test.csv")["test"]
@@ -199,7 +198,7 @@ if __name__ == "__main__":
 	args = argparser.parse_args()
 
 	visible_devices = torch.cuda.device_count()
-	device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+	device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
 
 	print(f"Using device: {device}")
 	print(f"GPU available: {torch.cuda.is_available()}")
@@ -228,5 +227,5 @@ if __name__ == "__main__":
 
 	# infer(model, tokenizer, eval_loader, args.model_type, args.model_size, args.directory,
 	#       split='dev', experiment_name=args.experiment_name)
-	infer(model, tokenizer, test_loader, args.model_type, args.model_size, args.directory,
-	      split='submission' if args.task == "spelling_correction" else 'devtest', experiment_name=args.experiment_name)
+	# infer(model, tokenizer, test_loader, args.model_type, args.model_size, args.directory,
+	    #   split='submission' if args.task == "spelling_correction" else 'devtest', experiment_name=args.experiment_name)
