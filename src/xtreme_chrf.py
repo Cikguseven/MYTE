@@ -38,7 +38,7 @@ def parse_data_example(example):
 
 
 def preprocess_function(examples, tokenizer, max_length=1024):
-    device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
     inputs = tokenizer(examples["text"], padding="longest", max_length=max_length, truncation=True, return_tensors="pt").to(device)
     targets = tokenizer(examples["target"], padding="longest", max_length=max_length, truncation=True, return_tensors="pt").to(device)
 
@@ -57,10 +57,10 @@ def get_dataset(lang, dataset_dir, task, tokenizer, sample_size=100, split='test
     dataset = dataset.shuffle(seed=42).select(range(sample_size))
     dataset = dataset.map(partial(preprocess_function, tokenizer=tokenizer), desc="Running tokenizer", batched=True, batch_size=32)
 
-    return DataLoader(dataset, batch_size=4)
+    return DataLoader(dataset, batch_size=32)
 
 def reconstruct(inp, tokenizer, model):
-	device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
+	device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 	result = []
 	tokenized = tokenizer(inp, padding=True, return_tensors="pt").to(device)
 	out = model.generate(**tokenized, max_length=300)
@@ -97,12 +97,12 @@ def compute_chrf_for_task(model, tokenizer, lang, dataset_dir, task):
             # Generate predictions
             batch_predictions = reconstruct(input_texts, tokenizer, model)
 
-            predictions.append(batch_predictions)
-            targets.append(target_texts)
+            predictions.extend(batch_predictions)
+            targets.extend(target_texts)
 
     # Compute chrF score
     predictions, targets = normalize_targets_predictions(predictions, targets)
-    return sacrebleu.corpus_chrf(predictions, targets)
+    return sacrebleu.corpus_chrf(predictions, [targets])
 
 
 if __name__ == "__main__":
@@ -117,7 +117,7 @@ if __name__ == "__main__":
     args = argparser.parse_args()
 
     task = "translation"
-    device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 
     model, tokenizer = get_model_tokenizer(args.model_type, args.model_size, args.model_steps, args.model_dir, device=device)
 

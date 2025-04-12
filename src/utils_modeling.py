@@ -34,7 +34,7 @@ LOW_RES_LANGUAGES = frozenset([ 'af', 'bn', 'be', 'bg', 'bs', 'my', 'ceb', 'da',
                                 'st', 'ss', 'sw', 'tg', 'te', 'bo', 'ts', 'tw', 'umb', 'hsb', 've', 'cy', 'wo', 'xh', 'yo', 'zu',
                                 'ast', 'war', 'aeb', 'sa', 'sal'])
 
-def get_model_tokenizer(model_type, model_size, model_steps, checkpoint_dir, task=None, device=torch.device("cuda:0"), dropout=0.1):
+def get_model_tokenizer(model_type, model_size, model_steps, checkpoint_dir, task=None, device=torch.device("cuda:2"), dropout=0.1):
 	# load fine-tuned model if available
 
 	# if task is not None and os.path.isdir(f"{checkpoint_dir}/{model_type}_{model_size}_{model_steps}_{task}") is True:
