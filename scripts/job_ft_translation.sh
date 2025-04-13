@@ -1,8 +1,8 @@
 #! /bin/bash
 
-MODEL_TYPE="myt5"
+MODEL_TYPE="byt5"
 MODEL_SIZE="large"
-MODEL_NAME="mt-v8"
+MODEL_NAME="mt-v1"
 MODEL_STEPS=250000
 
 CUDA_VISIBLE_DEVICES=0,1,2,3 python3.10 ../src/ft_generative_task.py \
