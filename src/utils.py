@@ -15,6 +15,12 @@ def hex_to_str(bline: str, sep: str = ' ') -> str:
 def normalize_text(text, form='NFKC'):
 	return normalize(form, text)
 
+def parse_data_example(example):
+    text = example['input']
+    target = example['target']
+
+    return {"text": normalize_text(text), "target": normalize_text(target)}
+
 NUM_MORPH_CLUSTERS = 8
 
 

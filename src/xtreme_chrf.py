@@ -3,13 +3,12 @@ import json
 import torch
 import argparse
 import sacrebleu
-import unicodedata2
 from tqdm import tqdm
 from datasets import Dataset
 from torch.utils.data import DataLoader
 from functools import partial
 
-from utils import normalize_text
+from utils import normalize_text, parse_data_example
 from utils_modeling import get_model_tokenizer
 
 TASK_LANGUAGES = [
@@ -21,6 +20,7 @@ TASK_LANGUAGES = [
     'en2ja',
     'en2kk',
     'en2ko',
+    'en2mt',
     'en2pl',
     'en2ru',
     'en2sn',
@@ -30,19 +30,11 @@ TASK_LANGUAGES = [
     ]
 
 
-def parse_data_example(example):
-    text = example['input']
-    target = example['target']
-
-    return {"text": normalize_text(text), "target": normalize_text(target)}
-
-
 def preprocess_function(examples, tokenizer, max_length=1024):
-    device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
-    inputs = tokenizer(examples["text"], padding="longest", max_length=max_length, truncation=True, return_tensors="pt").to(device)
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    model_inputs = tokenizer(examples["text"], padding="longest", max_length=max_length, truncation=True, return_tensors="pt").to(device)
     targets = tokenizer(examples["target"], padding="longest", max_length=max_length, truncation=True, return_tensors="pt").to(device)
 
-    model_inputs = inputs
     model_inputs["labels"] = targets["input_ids"]
 
     return model_inputs
@@ -55,12 +47,13 @@ def get_dataset(lang, dataset_dir, task, tokenizer, sample_size=100, split='test
 
     dataset = Dataset.from_list(examples)
     dataset = dataset.shuffle(seed=42).select(range(sample_size))
-    dataset = dataset.map(partial(preprocess_function, tokenizer=tokenizer), desc="Running tokenizer", batched=True, batch_size=32)
+    dataset = dataset.map(partial(preprocess_function, tokenizer=tokenizer), desc="Running tokenizer", batched=True, batch_size=64)
 
     return DataLoader(dataset, batch_size=32)
 
+
 def reconstruct(inp, tokenizer, model):
-	device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
+	device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 	result = []
 	tokenized = tokenizer(inp, padding=True, return_tensors="pt").to(device)
 	out = model.generate(**tokenized, max_length=300)
@@ -72,15 +65,10 @@ def reconstruct(inp, tokenizer, model):
 	return result
 
 
-def unicode_normalization(text: str) -> str:
-  """Applies Unicode normalization."""
-  return unicodedata2.normalize("NFKC", text)
-
-
 def normalize_targets_predictions(predictions: list[str], targets: list[str]) -> tuple[list[str], list[str]]:
     """Normalize predictions and targets for all tasks."""
-    predictions = [unicode_normalization(p) for p in predictions]
-    targets = [unicode_normalization(t) for t in targets]
+    predictions = [normalize_text(p) for p in predictions]
+    targets = [normalize_text(t) for t in targets]
     return predictions, targets
 
 
@@ -117,7 +105,7 @@ if __name__ == "__main__":
     args = argparser.parse_args()
 
     task = "translation"
-    device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     model, tokenizer = get_model_tokenizer(args.model_type, args.model_size, args.model_steps, args.model_dir, device=device)
 
