@@ -17,7 +17,7 @@ from tqdm import tqdm
 from utils import parse_data_example
 from utils_modeling import get_model_tokenizer
 
-N_EVAL_BATCHES = 64
+N_EVAL_BATCHES = 3735
 
 TASK_LANGUAGES = [
     'en2am',
@@ -131,8 +131,6 @@ def train_evaluate(model, train_loader, eval_loader, lr=1e-3, n_epochs=30, orig_
             with accelerator.accumulate(model):
                 optimizer.zero_grad()
 
-                # Batch should already be a dict of tensors on the correct device
-                # No need for isinstance checks or .to(device) if prepare worked correctly
                 try:
                     outputs = model(
                         input_ids=batch['input_ids'],
@@ -228,11 +226,9 @@ if __name__ == "__main__":
     argparser.add_argument("--n_epochs", default=30, type=int)
     argparser.add_argument("--train_batch_size", default=4, type=int, help="Batch size for training")
     argparser.add_argument("--eval_batch_size", default=2, type=int, help="Batch size for evaluation")
-    argparser.add_argument("--map_batch_size", default=1000, type=int, help="Batch size for dataset mapping (adjust based on RAM)")
+    argparser.add_argument("--map_batch_size", default=2000, type=int, help="Batch size for dataset mapping (adjust based on RAM)")
 
     args = argparser.parse_args()
-
-    accelerator = Accelerator()
 
     model_save_path = f"{args.model_dir}/{args.model_type}_{args.model_size}-{args.model_name}_{args.model_steps}"
 
@@ -265,5 +261,4 @@ if __name__ == "__main__":
 
         print(f"Saving model to {model_save_path}...")
         model.save_pretrained(model_save_path, use_safetensors=True)
-        tokenizer.save_pretrained(model_save_path)
         print(f"Model and tokenizer saved successfully.")

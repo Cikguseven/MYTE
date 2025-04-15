@@ -31,9 +31,8 @@ TASK_LANGUAGES = [
 
 
 def preprocess_function(examples, tokenizer, max_length=1024):
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    model_inputs = tokenizer(examples["text"], padding="longest", max_length=max_length, truncation=True, return_tensors="pt").to(device)
-    targets = tokenizer(examples["target"], padding="longest", max_length=max_length, truncation=True, return_tensors="pt").to(device)
+    model_inputs = tokenizer(examples["text"], padding="longest", max_length=max_length, truncation=True, return_tensors="pt")
+    targets = tokenizer(examples["target"], padding="longest", max_length=max_length, truncation=True, return_tensors="pt")
 
     model_inputs["labels"] = targets["input_ids"]
 
@@ -53,16 +52,20 @@ def get_dataset(lang, dataset_dir, task, tokenizer, sample_size=100, split='test
 
 
 def reconstruct(inp, tokenizer, model):
-	device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-	result = []
-	tokenized = tokenizer(inp, padding=True, return_tensors="pt").to(device)
-	out = model.generate(**tokenized, max_length=300)
-	out = out.cpu().numpy().tolist()
-	for seq in out:
-		seq = [i for i in seq if i != 0 and i != 1]
-		result.append(normalize_text(tokenizer.decode(seq)))
+    result = []
+    tokenized = tokenizer(inp, padding=True, return_tensors="pt")
 
-	return result
+    # Move tokenized inputs to the same device as the model
+    device = model.device
+    tokenized = {k: v.to(device) for k, v in tokenized.items()}
+
+    out = model.generate(**tokenized, max_length=300)
+    out = out.cpu().numpy().tolist()
+    for seq in out:
+        seq = [i for i in seq if i != 0 and i != 1]
+        result.append(normalize_text(tokenizer.decode(seq)))
+
+    return result
 
 
 def normalize_targets_predictions(predictions: list[str], targets: list[str]) -> tuple[list[str], list[str]]:
@@ -105,9 +108,8 @@ if __name__ == "__main__":
     args = argparser.parse_args()
 
     task = "translation"
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    model, tokenizer = get_model_tokenizer(args.model_type, args.model_size, args.model_steps, args.model_dir, device=device)
+    model, tokenizer = get_model_tokenizer(args.model_type, args.model_size, args.model_steps, args.model_dir)
 
     chrf_scores = {}
 

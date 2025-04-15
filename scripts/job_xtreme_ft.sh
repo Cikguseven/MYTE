@@ -3,10 +3,10 @@
 MODEL_DIR="../models"
 MODEL_TYPE="myt5"
 MODEL_SIZE="large"
-MODEL_NAME="mt-v8.1"
+MODEL_NAME="mt-v8.1c"
 MODEL_STEPS=250000
 
-CUDA_VISIBLE_DEVICES=0,1,2,3 python3.10 ../src/xtreme_ft.py \
+CUDA_VISIBLE_DEVICES=3 python3.10 ../src/xtreme_ft.py \
     --model_dir $MODEL_DIR \
     --task "translation" \
     --model_type $MODEL_TYPE \
