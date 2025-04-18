@@ -1,15 +1,21 @@
-#! /bin/bash
+#!/bin/bash
 
 MODEL_DIR="../models"
 MODEL_TYPE="myt5"
 MODEL_SIZE="large"
-MODEL_NAME="mt-v8.1c"
+TASK="qa_in_lang"
+MODEL_NAME="v2"
 MODEL_STEPS=250000
+TIMESTAMP="$(date +%b%d_%H:%M)"
+LOG_FILE="../logs/FT_${TIMESTAMP}_${MODEL_SIZE}_${TASK}_${MODEL_NAME}.log"
 
-CUDA_VISIBLE_DEVICES=3 python3.10 ../src/xtreme_ft.py \
+mkdir -p ../logs
+
+CUDA_VISIBLE_DEVICES=3 nohup python3.10 ../src/xtreme_ft.py \
     --model_dir $MODEL_DIR \
-    --task "translation" \
+    --task $TASK \
     --model_type $MODEL_TYPE \
     --model_size $MODEL_SIZE \
     --model_name $MODEL_NAME \
-    --model_steps $MODEL_STEPS
+    --model_steps $MODEL_STEPS \
+    > "$LOG_FILE" 2>&1 &

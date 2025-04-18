@@ -1,14 +1,14 @@
 #!/bin/bash
 
 MODEL_DIR="../models"
-MODEL_TYPE="byt5"
-MODEL_SIZE="large"
+MODEL_TYPE="myt5"
+MODEL_SIZE="large-qa_in_lang-v1"
 TIMESTAMP="$(date +%b%d_%H:%M)"
-LOG_FILE="../logs/QA_${TIMESTAMP}_${MODEL_TYPE}_${MODEL_SIZE}.log"
+LOG_FILE="../logs/MT_${TIMESTAMP}_${MODEL_TYPE}_${MODEL_SIZE}.log"
 
 mkdir -p ../logs
 
-CUDA_VISIBLE_DEVICES=2 nohup python3.10 ../src/xtreme_qa.py \
+CUDA_VISIBLE_DEVICES=1 nohup python3.10 ../src/xtreme_mt.py \
     --model_dir $MODEL_DIR \
     --model_type $MODEL_TYPE \
     --model_size $MODEL_SIZE \
