@@ -2,7 +2,7 @@
 
 MODEL_DIR="../models"
 MODEL_TYPE="myt5"
-MODEL_SIZE="large-qa_in_lang-v1"
+MODEL_SIZE="large-translation-id-zh"
 TIMESTAMP="$(date +%b%d_%H:%M)"
 LOG_FILE="../logs/MT_${TIMESTAMP}_${MODEL_TYPE}_${MODEL_SIZE}.log"
 

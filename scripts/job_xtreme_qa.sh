@@ -1,8 +1,8 @@
 #!/bin/bash
 
 MODEL_DIR="../models"
-MODEL_TYPE="byt5"
-MODEL_SIZE="large"
+MODEL_TYPE="myt5"
+MODEL_SIZE="large-qa_in_lang-v2"
 TIMESTAMP="$(date +%b%d_%H:%M)"
 LOG_FILE="../logs/QA_${TIMESTAMP}_${MODEL_TYPE}_${MODEL_SIZE}.log"
 

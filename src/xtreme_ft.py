@@ -10,16 +10,17 @@ from accelerate import Accelerator
 from copy import deepcopy
 from datasets import Dataset
 from functools import partial
-from itertools import islice, cycle
+from itertools import islice
 from torch.utils.data import DataLoader
+from transformers import DataCollatorForSeq2Seq
 from tqdm import tqdm
 
-from utils import parse_data_example
+from utils import parse_data_example, preprocess_function
 from utils_modeling import get_model_tokenizer
 
-N_EVAL_BATCHES = 3735
+N_EVAL_BATCHES = 500
 
-TASK_LANGUAGES = [
+MT_LANGUAGES = [
     'en2am',
     'en2de',
     'en2el',
@@ -37,36 +38,47 @@ TASK_LANGUAGES = [
     'en2vi'
     ]
 
+MT_LANGUAGES_2 = [
+    'en2id',
+    'en2zh',
+    ]
 
-def preprocess_function(examples, tokenizer, max_length=300):
-    model_inputs = tokenizer(examples["text"], padding="max_length", max_length=max_length, truncation=True, return_tensors="pt")
-    targets = tokenizer(examples["target"], padding="max_length", max_length=max_length, truncation=True, return_tensors="pt")
+QA_LANGUAGES = [
+  'ar',
+  'bn',
+  'en',
+  'fi',
+  'id',
+  'ko',
+  'ru',
+  'sw',
+  'te'
+  ]
 
-    model_inputs["labels"] = targets["input_ids"]
 
-    return model_inputs
-
-
-def get_dataset(directory, tokenizer, task, train_batch_size=4, eval_batch_size=2, map_batch_size=1000):
+def get_dataset(directory, tokenizer, task, train_batch_size=4, eval_batch_size=2, map_batch_size=1000, sample_size=1000):
     train_examples = []
     eval_examples = []
 
-    # Iterate over all languages in TASK_LANGUAGES
-    for lang in TASK_LANGUAGES:
+    if task=="translation":
+        language_list = MT_LANGUAGES_2
+    elif task=="qa_in_lang":
+        language_list = QA_LANGUAGES
+
+    for lang in language_list:
         train_file = os.path.join(directory, task, "train", f"{lang}.jsonl")
         eval_file = os.path.join(directory, task, "validation", f"{lang}.jsonl")
 
         # Load training dataset
         if os.path.exists(train_file):
             with open(train_file, 'r') as f:
-                train_examples.extend([parse_data_example(json.loads(line)) for line in f.readlines()])
+                train_examples.extend([parse_data_example(task, json.loads(line)) for line in islice(f, sample_size)])
 
         # Load evaluation dataset
         if os.path.exists(eval_file):
             with open(eval_file, 'r') as f:
-                eval_examples.extend([parse_data_example(json.loads(line)) for line in f.readlines()])
+                eval_examples.extend([parse_data_example(task, json.loads(line)) for line in islice(f, sample_size)])
 
-    # Convert to Hugging Face Dataset format
     train_dataset = Dataset.from_list(train_examples)
     eval_dataset = Dataset.from_list(eval_examples)
 
@@ -85,18 +97,16 @@ def get_dataset(directory, tokenizer, task, train_batch_size=4, eval_batch_size=
         desc="Running tokenizer on eval set"
     )
 
-    # Set format to PyTorch tensors for the DataLoader
     processed_train_dataset.set_format("torch")
     processed_eval_dataset.set_format("torch")
 
-    # Create *single* DataLoaders to batch the processed tensors
     train_loader = DataLoader(
-        processed_train_dataset.shuffle(seed=42), # Shuffle the processed dataset
+        processed_train_dataset.shuffle(seed=42),
         batch_size=train_batch_size,
         shuffle=True # Shuffle batches each epoch
     )
     eval_loader = DataLoader(
-        processed_eval_dataset, # No need to shuffle eval data
+        processed_eval_dataset.shuffle(seed=42),
         batch_size=eval_batch_size
     )
 
@@ -230,14 +240,14 @@ if __name__ == "__main__":
 
     args = argparser.parse_args()
 
-    model_save_path = f"{args.model_dir}/{args.model_type}_{args.model_size}-{args.model_name}_{args.model_steps}"
+    model_save_path = f"{args.model_dir}/{args.model_type}_{args.model_size}-{args.task}-{args.model_name}_{args.model_steps}"
 
     if os.path.isdir(model_save_path):
          print(f"Fine-tuned model directory exists: {model_save_path}, exiting...")
     else:
         print("Model directory does not exist, starting training...")
 
-        model, tokenizer = get_model_tokenizer(args.model_type, args.model_size, args.model_steps, args.model_dir)
+        model, tokenizer = get_model_tokenizer(args.model_type, args.model_size, args.model_steps, args.model_dir, trained=False)
 
         print("Loading and preprocessing dataset...")
         train_loader, eval_loader = get_dataset(

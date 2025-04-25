@@ -1,5 +1,4 @@
-import transformers
-from transformers import ByT5Tokenizer, T5ForConditionalGeneration, T5Config
+from transformers import ByT5Tokenizer, T5ForConditionalGeneration
 from pynvml import *
 import torch
 import pandas as pd
@@ -34,47 +33,50 @@ LOW_RES_LANGUAGES = frozenset([ 'af', 'bn', 'be', 'bg', 'bs', 'my', 'ceb', 'da',
                                 'st', 'ss', 'sw', 'tg', 'te', 'bo', 'ts', 'tw', 'umb', 'hsb', 've', 'cy', 'wo', 'xh', 'yo', 'zu',
                                 'ast', 'war', 'aeb', 'sa', 'sal'])
 
-def get_model_tokenizer(model_type, model_size, model_steps, checkpoint_dir, device=torch.device("cuda:0"), dropout=0.1):
-	model = T5ForConditionalGeneration.from_pretrained(f"{checkpoint_dir}/{model_type}_{model_size}_{model_steps}",
-		                                                   use_safetensors=True, dropout_rate=dropout)
-	model = model.to(device)
-	if model_type == 'byt5':
-		tokenizer = ByT5Tokenizer()
-	else:
-		tokenizer = MyT5Tokenizer(decompose_map="../byte_maps/decompose_map.json", merge_map="../byte_maps/merge_map.json")
-	return model, tokenizer
+def get_model_tokenizer(model_type, model_size, model_steps, checkpoint_dir, trained, device=torch.device("cuda:0"), dropout=0.1):
+    if trained:
+        model = T5ForConditionalGeneration.from_pretrained(f"{checkpoint_dir}/{model_type}_{model_size}_{model_steps}")
+    else:
+        model = T5ForConditionalGeneration.from_pretrained(f"{checkpoint_dir}/{model_type}_{model_size}_{model_steps}",
+                                                           use_safetensors=True, dropout_rate=dropout)
+    model = model.to(device)
+    if model_type == 'byt5':
+        tokenizer = ByT5Tokenizer()
+    else:
+        tokenizer = MyT5Tokenizer(decompose_map="../byte_maps/decompose_map.json", merge_map="../byte_maps/merge_map.json")
+    return model, tokenizer
 
 
 def get_flores_data(flores_dir, languages, split='devtest'):
-	flores = {}
+    flores = {}
 
-	flores_split_dir = f'{flores_dir}/{split}'
-	for lang in languages:
-		with open(f'{flores_split_dir}/{FLORES_MAPPING[lang]}.{split}', 'r') as f:
-			flores[lang] = f.read().splitlines()
-	return flores
+    flores_split_dir = f'{flores_dir}/{split}'
+    for lang in languages:
+        with open(f'{flores_split_dir}/{FLORES_MAPPING[lang]}.{split}', 'r') as f:
+            flores[lang] = f.read().splitlines()
+    return flores
 
 
 def create_dfs(res_dict, model_name='', value_column='NLL'):
-	data_list = []
-	for lang, lang_vals in res_dict.items():
-		for val in lang_vals:
-			data_list.append([lang, val])
-	data_df = pd.DataFrame(data_list, columns=['Language', value_column])
-	avg_df = data_df.groupby(['Language'])[value_column].mean().reset_index()
+    data_list = []
+    for lang, lang_vals in res_dict.items():
+        for val in lang_vals:
+            data_list.append([lang, val])
+    data_df = pd.DataFrame(data_list, columns=['Language', value_column])
+    avg_df = data_df.groupby(['Language'])[value_column].mean().reset_index()
 
-	# raname Language if its en2xx into xx (only in translation task)
-	avg_df['Language'] = avg_df['Language'].apply(lambda x: x.split('2')[-1])
+    # raname Language if its en2xx into xx (only in translation task)
+    avg_df['Language'] = avg_df['Language'].apply(lambda x: x.split('2')[-1])
 
-	avg_df.set_index('Language', inplace=True)
-	avg_df.loc['AVG'] = avg_df.mean()
-	avg_df.loc['AVG LR'] = avg_df[avg_df.index.isin(LOW_RES_LANGUAGES)].mean()
-	return data_df, avg_df
+    avg_df.set_index('Language', inplace=True)
+    avg_df.loc['AVG'] = avg_df.mean()
+    avg_df.loc['AVG LR'] = avg_df[avg_df.index.isin(LOW_RES_LANGUAGES)].mean()
+    return data_df, avg_df
 
 
 def print_gpu_mem_usage():
-	h = nvmlDeviceGetHandleByIndex(0)
-	info = nvmlDeviceGetMemoryInfo(h)
-	print(f'total    : {info.total}')
-	print(f'free     : {info.free}')
-	print(f'used     : {info.used}')
+    h = nvmlDeviceGetHandleByIndex(0)
+    info = nvmlDeviceGetMemoryInfo(h)
+    print(f'total    : {info.total}')
+    print(f'free     : {info.free}')
+    print(f'used     : {info.used}')

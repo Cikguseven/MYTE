@@ -3,8 +3,8 @@
 MODEL_DIR="../models"
 MODEL_TYPE="myt5"
 MODEL_SIZE="large"
-TASK="qa_in_lang"
-MODEL_NAME="v2"
+TASK="translation"
+MODEL_NAME="id-zh"
 MODEL_STEPS=250000
 TIMESTAMP="$(date +%b%d_%H:%M)"
 LOG_FILE="../logs/FT_${TIMESTAMP}_${MODEL_SIZE}_${TASK}_${MODEL_NAME}.log"
