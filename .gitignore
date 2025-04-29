@@ -4,3 +4,6 @@
 /models
 /src/__pycache__/
 /xtreme_up_v1.1
+/src/myt5/__pycache__/
+/bpe_corpus
+/logs
