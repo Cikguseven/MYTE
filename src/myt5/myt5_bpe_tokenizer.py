@@ -131,7 +131,7 @@ class MyT5BPETokenizer(PreTrainedTokenizer):
             self,
             decompose_map=None,
             merge_map=None,
-            bpe_tokenizer_path="./16000.json",
+            bpe_tokenizer_path="./100000_16000.json",
             eos_token="</s>",
             unk_token="<unk>",
             pad_token="<pad>",
